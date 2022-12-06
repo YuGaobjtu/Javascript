@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html>
+<head>
+
+	<title>Traffic Noise Explorer</title>
+
+	<meta charset="utf-8" />
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+	
+    <link rel="stylesheet" href="stylesheet.css">
+
+  <!-- To be updated -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css" crossorigin=""/>
+  <script src="https://unpkg.com/leaflet@1.6.0/dist/leaflet.js" crossorigin=""></script>
+
+  <script src="https://code.jquery.com/jquery-3.4.1.min.js" integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo=" crossorigin= "anonymous"></script>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+  <script src= "https://cdn.jsdelivr.net/npm/@turf/turf@5/turf.min.js"></script>
+
+  <script src="https://cdn.jsdelivr.net/gh/aazuspan/leaflet-feature-legend/src/feature-legend.js"></script>
+  <link href="https://cdn.jsdelivr.net/gh/aazuspan/leaflet-feature-legend/src/feature-legend.css" rel="stylesheet" />
+
+      <!-- BOOTSTRAP -->
+
+  <!-- Latest compiled and minified CSS -->
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/css/bootstrap.min.css">
+
+<!-- jQuery library -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+
+<!-- Latest compiled JavaScript -->
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.1/js/bootstrap.min.js"></script>
+
+</head>
+<body>
+<!-- Modal -->
+<div class="modal fade" id="exampleModalCenter" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered" role="document">
+    <div class="modal-content">
+      <div class="modal-header" style="text-align: center;">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+          <span aria-hidden="true">&times;</span>
+        </button>
+        <img src="logo.png" alt="logo">
+        <h5 class="modal-title" style="text-align:center" id="exampleModalLongTitle"> User Instructions:</h5>
+
+      </div>
+      <div class="modal-body" style="text-align:center">
+        <ul type="circle"></ul>
+        <li>To start the traffic simulation press the play button!</li>
+        <li>You can switch  the visualisation attribute from Speed to Acceleration</li>
+        <li>You can change the cellsize of the noise grid</li>
+        <li>You select a specific car by clicking on a car and press the "Select Car" button in the Pop-Up window</li>
+        <li>You can change the type of car to electric as well</li>
+        <li>After you have selected a single car you can chose a reduction factor</li>
+        <li>You can also change the radius of the Noise distributation of the selected car</li></ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="text/javascript">
+  $(window).on('load', function() {
+      $('#exampleModalCenter').modal('show');
+  });
+</script> 
+
+<div class="header">
+  <h2><span class= "headerc">Traffic Noise Explorer</span></h2>
+<!-- Select Visualisation--> 
+<label for="cars"><span class= "headera">Visualize:</span></label>
+<select name="sel" id="sel" onchange="switchLegend()">
+  <option value="Speed">Speed</option>
+  <option value="Acceleration">Acceleration</option>
+</select>
+
+<!-- Select Cellsize--> 
+<label for="framework2"><span class= "headera">Cellsize: </span></label>
+  <select id="framework2" onchange="myFunction(this)">
+    <option value="10">10 m</option>
+    <option value="20">20 m</option>
+    <option value="30">30 m</option>
+    <option value="40">40 m</option>
+    <option value="50">50 m</option>
+  </select>
+
+<h4><span class= "headerb">Show Noise Distribution for Single Car:</span>
+<!-- swich between noise buffer around Car and the whole noise--> 
+<label class="switch">
+  <input id="switch" type="checkbox">
+  <span class="slider round"></span>
+</label>
+</h4>
+<!-- select noise reduction--> 
+<label for="Noise_Red"><span class= "headera">Reduction of Noise:</span></label>
+  <select id="Noise_Red" onchange="myFunction2(this)">
+    <option value="1">0%</option>
+    <option value="0.9">10%</option>
+    <option value="0.8">20%</option>
+    <option value="0.7">30%</option>
+    <option value="0.6">40%</option>
+  </select>
+
+<!-- select radius around car--> 
+  <label for="Radius"><span class= "headera">Radius of Noisebuffer:</span></label>
+  <select id="Radius" onchange="myFunction3(this)">
+    <option value="50">50 m</option>
+    <option value="75">75 m</option>
+    <option value="100">100 m</option>
+    <option value="125">125 m</option>
+    <option value="150">150 m</option>
+    <option value="200">200 m</option>
+  </select>
+<br>  
+
+
+
+</div>
+
+<div id="mapid" class="main"></div>
+<!-- load pictures of team--> 
+<div class="footer">
+  <div class="row">
+    <h2>About The Project</h2>
+  </div>
+  <div class="column2">
+    <p>This web application consists of a map with geo-based multi-layer environmental modelling of urban traffic. The simulated noise data and traffic data are provided by the GEOMETRIC project.</p>
+  </div>
+  <div class="row">
+    <h2>Meet The Team</h2>
+  </div>
+  <div class="column">
+    <img src="yu.png" style="width:50px;height:50px;border-radius:50%;" alt="Team member">
+    <p>Yu Gao, 22, China. </p>
+  </div>
+  <div class="column">
+    <img src="alba.png" style="width:50px;height:50px;border-radius:50%;" alt="Team member">
+    <p>Alba Lunner, 23, Sweden. </p>
+  </div>
+  <div class="column">
+    <img src="pelle.jpg" style="width:50px;height:50px;border-radius:50%;" alt="Team member">
+    <p>Pelle Rauch, 25, Germany. </p>
+  </div>
+  <div class="column">
+    <img src="lola.jpg" style="width:50px;height:50px;border-radius:50%;" alt="Team member">
+    <p>Lola Voignier-Simon, 22, France. </p>
+  </div>
+</div>
+
+<script>
+//initalize Leaflet
+var map = L.map ('mapid'). setView ([59.31681882851151,18.081889381459572], 15);
+var osm=L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {	attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'}).addTo(map);	
+
+//Variables
+var car_id;
+var show_car_noice=false;
+
+var input = document.getElementById('switch');
+    input.addEventListener('change',function(){
+        if(this.checked) {            
+          show_car_noice=true;
+          if (car_id ==null){
+            alert("You have not selected a Car! To select a Car please click on a specific Car and press the Select Button in the Pop-Up Window");
+            document.getElementById("switch").checked = false;
+          }
+        } else {
+          show_car_noice=false;
+        }
+    });
+
+
+
+//selcet gridsize
+var size = document.getElementById("framework2");
+
+var testpoint,cellsize=50;
+
+function myFunction(size)
+{
+    cellsize = size.value;
+}
+
+// selcet Reduction
+var red = document.getElementById("Noise_Red");
+
+var reduction=1;
+
+function myFunction2(red)
+{
+    reduction = red.value;
+}
+
+// selcet Radius
+var r = document.getElementById("Radius");
+
+var radius=100;
+
+function myFunction3(red)
+{
+    radius = r.value;
+}
+
+//Car icons
+var LeafIcon = L.Icon.extend({
+    options: {
+    shadowUrl: '',
+    iconSize:     [10, 10], // size of the icon
+    shadowSize:   [0, 0], // size of the shadow
+    iconAnchor:   [5, 5], // point of the icon which will correspond to marker's location
+    shadowAnchor: [4, 62],  // the same for the shadow
+    popupAnchor:  [0, 0]
+    }
+});
+
+var greenCar = new LeafIcon({iconUrl: 'greencar.png'}),
+    redCar = new LeafIcon({iconUrl: 'redcar.png'}),
+    orangeCar = new LeafIcon({iconUrl: 'orangecar.png'});
+
+var elecCar = L.icon({
+    iconUrl: 'ecar.png',
+    shadowUrl: '',
+    iconSize:     [30, 30], // size of the icon
+    shadowSize:   [0, 0], // size of the shadow
+    iconAnchor:   [15, 15], // point of the icon which will correspond to marker's location
+    shadowAnchor: [0, 0],  // the same for the shadow
+    popupAnchor:  [0, 0] // point from which the popup should open relative to the iconAnchor
+});
+
+
+
+
+var cars;
+
+var sel = document.getElementById("sel");
+
+function onEachFeature ( feature , layer )
+{
+
+}
+
+//get Cars from DB
+function load_cars (time)
+{
+    if( cars )
+    {
+        map.removeLayer(cars)
+    }
+    $.ajax ({
+        type: 'GET',
+        url: '/api/get_cars_time?time='+time,
+        async:false ,
+        success:function ( data )
+        {
+            cars=L.geoJSON(data[0].row_to_json,
+
+              {
+                
+              pointToLayer: function (feature, latlng) {
+                if (feature.properties.type != 'veh_passenger_e'){
+                    if (sel.value == "Speed"){
+                          if (feature.properties.speed<5.55) //<20 km/h
+                          {
+                            return L.marker(latlng, {icon: greenCar});
+                        }
+                        if ((feature.properties.speed>5.55)&&(feature.properties.speed<11.11)){ //between 20 and 40              
+                          return L.marker(latlng, {icon: orangeCar});
+                        }
+                        if (feature.properties.speed>11.11){//>40 km/h
+
+
+                          return L.marker(latlng, {icon: redCar});
+                        }        
+                    }
+                    if (sel.value == "Acceleration"){
+                          if (feature.properties.acceleration>0)
+                          {
+                            return L.marker(latlng, {icon: greenCar});
+                        }
+                        if (feature.properties.acceleration<0){
+                          return L.marker(latlng, {icon: redCar});
+                        }        
+                    }
+
+                  }
+                  if (feature.properties.type == 'veh_passenger_e'){
+                    return L.marker(latlng, {icon: elecCar});
+                  }
+
+            }}
+                    
+              );
+        }
+    });
+    if(cars)
+    {
+        cars.addTo(map).on('click', function(e){
+            open_carpopup(e)
+
+        });
+    }
+}
+;
+//Car Pop UP
+function open_carpopup(e) {
+  var popupLocation = new L.LatLng (e.latlng.lat ,e.latlng.lng );
+  var popupContent =
+      " <div id='report'>" +
+      "<h1 class= ' report-title '>" +"Information" + " </h1>" +
+      "<p id= 'report-field-id'>" +
+      " <span class= 'report-field-label'> ID: </ span >" +
+      " <span class= 'report-field-value'>" + e.layer.feature.properties.id  + "</span>" +
+      "</p>" +
+      "<p id= 'report-field-speed'>" +
+      "<span class= ' report-field-label '> Speed: </span>" +
+      "<span class= ' report-field-value '>" + e.layer.feature.properties.speed + "</span>" +
+      "</p>" +
+      "<p id= 'report-field-acceleration'>" +
+      " <span class= 'report-field-label'> Acceleration: </ span >" +
+      " <span class= 'report-field-value'>" + e.layer.feature.properties.acceleration + "</span>" +
+      "</p>" +
+      "<p id= 'report-field-type'>" +
+      " <span class= 'report-field-label'> Type of Vehicle: </ span >" +
+      " <span class= 'report-field-value'>" + e.layer.feature.properties.type + "</span>" +
+      "</p>" +
+      " <div class= 'report-btns'>" +
+      " <button id= 'change-button'>Change Type of Car</button><br>" +
+      " </div>" +
+      " <div class= 'report-btns'>" +
+      " <button id= 'noice-button'>Select Car</button>" +
+      " </div>" +
+      " </div>";
+  popup = new L.Popup();
+  popup.setLatLng(popupLocation);
+  popup.setContent(popupContent);
+  popup.openOn(map);
+  }
+//post
+
+
+//Change cartype in DB
+$( document ).on('click', '#change-button',function (e)
+	{
+
+		// PREPARE FORM DATA
+		var loc_data =
+				{
+					id:$(document).find('#report-field-id .report-field-value').text()
+				}
+	// DO POST
+		$.ajax (
+				{
+					type : "POST",
+					contentType :"application/json",
+					url : "/change_car_type",
+					data : JSON.stringify(loc_data),
+          success: function (e)
+					{
+					},
+					error : function (e) {
+						alert ("Error!");
+						console.log ("ERROR:",e);
+					}
+				});
+
+
+	});
+//show noise around car 
+  $( document ).on('click', '#noice-button',function (e)
+	{
+
+		// PREPARE FORM DATA
+    car_id= $(document).find('#report-field-id .report-field-value').text();
+    show_car_noice =true;
+    cellsize=20;
+    document.getElementById("switch").checked = true;
+    map.closePopup();
+
+	});
+
+    // style of interpolation
+    function style(feature) {  // style function for each grid color and its border
+            return {
+              fillColor: color(feature),
+              weight: 1,
+              opacity: 0.2,
+              color: color(feature),
+              fillOpacity: 0.8,
+              stroke: true,
+              fill: true,
+            };
+          }
+    
+    function color(feature) { // 9 color classes
+        let value = feature.properties.laeq.toFixed(3);
+        if (value <= 25) {
+        return "#ffffcc";
+        } else if (value > 25 && value <= 30) {
+        return "#ffeda0";
+        } else if (value > 30 && value <= 35) {
+        return "#fed976";
+        } else if (value > 35 && value <= 40) {
+        return "#feb24c";
+        } else if (value > 40 && value <= 45) {
+        return "#fd8d3c";
+        } else if (value > 45 && value <= 50) {
+        return "#fc4e2a";
+        } else if (value > 50 && value <= 55) {
+        return "#e31a1c";
+        } else if (value > 55 && value <= 60) {
+        return "#bd0026";
+        } else if (value > 60) {
+        return "#800026";
+        }
+    }
+
+var noice;
+var options = {gridType: 'hex', property: 'laeq', units: 'meters', weight: 3};
+//noise from DB for the whole are
+function load_noice (time)
+{
+    if( noice )
+    {
+        map.removeLayer(noice)
+    }
+    $.ajax ({
+        type: 'GET',
+        url: '/api/get_noice_time?time='+time,
+        async:false ,
+        success:function ( data )
+        {
+            n=L.geoJSON(data[0].row_to_json,
+                    {
+                        
+                    });
+        }
+    });
+    if(n)
+    {
+        n1=turf.interpolate(n.toGeoJSON(), cellsize, options)
+        noice=L.geoJSON(n1, {style:style}).addTo(map);
+    }
+}
+;
+
+//noise from DB around car
+function load_noice_car (time)
+{
+    if( noice )
+    {
+        map.removeLayer(noice)
+    }
+    $.ajax ({
+        type: 'GET',
+        url: '/api/get_noice_time_car?time='+time+'&carid='+car_id+'&reduction='+reduction+'&radius='+radius,
+        async:false ,
+        success:function ( data )
+        {
+            n=L.geoJSON(data[0].row_to_json,
+                    {
+                        
+                    });
+        }
+    });
+    if(n)
+    {
+        n1=turf.interpolate(n.toGeoJSON(), cellsize, options)
+        noice=L.geoJSON(n1, {style:style}).addTo(map);
+    }
+}
+;
+
+//timer
+let t = 20001;
+let timeout;
+let timer_on = 0;
+
+function cars_move() {
+    load_cars(t);
+    if (show_car_noice ==false){
+      load_noice(t);
+    }
+    if (show_car_noice ==true){
+      load_noice_car(t);
+    }  
+  t++;
+  myTime.addTo(map);
+  timeout = setTimeout(cars_move, 1000);
+}
+
+function startCount() {
+  if (!timer_on) {
+    timer_on = 1;
+    cars_move();
+  }
+}
+
+function stopCount() {
+  clearTimeout(timeout);
+  timer_on = 0;
+}
+
+
+//Time Display
+//Create control
+myTime = L.control({position: 'topright'});
+myTime.onAdd = function(map) {
+            this._div = L.DomUtil.create('div', 'myControl');
+            this._div.innerHTML = '<p> <span class="timestep">Timestep: '+t+'</span> </p>'
+            return this._div;
+}
+myTime.addTo(map);
+
+//Play Button
+myControl = L.control({position: 'topright'});
+myControl.onAdd = function(map) {
+            this._div = L.DomUtil.create('div', 'myControl');
+            this._div.innerHTML = ' <div class="timestep">'
+            +'<button class="img-size" onclick="startCount()"><img src="play.png" /></button>'+
+             '<button class="img-size" onclick="stopCount()"><img src="pause.png" /></button> </p>'+
+            " </div>";
+            return this._div;
+}
+myControl.addTo(map);
+
+//Legend Noise
+function getColor(d) {
+    return d > 60 ? '#800026' :
+           d > 55 ? '#bd0026' :
+           d > 50 ? '#e31a1c' :
+           d > 45 ? '#fc4e2a' :
+           d > 40 ? '#fd8d3c' :
+           d > 35 ? '#feb24c' :
+           d > 30 ? '#fed976' :
+           d > 25 ? '#ffeda0' :
+                    '#ffffcc';
+}
+
+var legend = L.control({position: 'bottomright'});
+
+legend.onAdd = function (map) {
+
+var div = L.DomUtil.create('div', 'info legend'),
+    grades = [0, 25, 30, 35, 40, 45, 50, 55, 60],
+    labels = [];
+
+div.innerHTML +='<b>Noise Level</b><br>';
+// loop through our density intervals and generate a label with a colored square for each interval
+for (var i = 0; i < grades.length; i++) {
+    div.innerHTML +=
+        '<i style="background:' + getColor(grades[i] + 1) + '"></i> ' +
+        grades[i] + (grades[i + 1] ? '&ndash;' + grades[i + 1] + ' dBA<br>' : '+ dBA');
+
+        console.log(getColor(grades[i] + 1));
+}
+
+return div;
+};
+
+legend.addTo(map);
+//legend cars
+var ecar_icon = L.icon({ iconUrl: 'ecar.png', iconSize: [5, 5] });
+const greencar_icon = L.icon({ iconUrl: 'greencar.png', iconSize: [5, 5] });
+const orangecar_icon = L.icon({ iconUrl: 'orangecar.png', iconSize: [10, 10] });
+const redcar_icon = L.icon({ iconUrl: 'redcar.png', iconSize: [10, 10] });
+const ecar = L.marker([51.505, -0.115], { icon: ecar_icon })
+const greencar = L.marker([51.505, -0.115], { icon: greencar_icon })
+const orangecar = L.marker([51.505, -0.115], { icon: orangecar_icon })
+const redcar = L.marker([51.505, -0.115], { icon: redcar_icon })
+
+
+var items;
+var legendS;
+var legendA;
+
+var items ={ "ecar": ecar,"<20 km/h": greencar,"20 km/h - 40 km/h": orangecar,">40 km/h": redcar}
+    legendS = L.control.featureLegend(items, {
+    position: "bottomleft",
+    title: "Cars",
+    symbolContainerSize: 24,
+    symbolScaling: "maximum",
+    maxSymbolSize: 24,
+    minSymbolSize: 2,
+    collapsed: false,
+    drawShadows: true,
+}).addTo(map);
+
+
+
+function switchLegend(){
+if(sel.value == "Speed"){
+  map.removeControl(legendA);
+  var items ={ "ecar": ecar,"<20 km/h": greencar,"20 km/h - 40 km/h": orangecar,">40 km/h": redcar}
+    legendS = L.control.featureLegend(items, {
+    position: "bottomleft",
+    title: "Cars",
+    symbolContainerSize: 24,
+    symbolScaling: "maximum",
+    maxSymbolSize: 24,
+    minSymbolSize: 2,
+    collapsed: false,
+    drawShadows: true,
+}).addTo(map);
+};
+
+if(sel.value == "Acceleration"){
+  map.removeControl(legendS);
+  var items ={ "ecar": ecar,"accelerating": greencar,"breaking": redcar}
+    legendA = L.control.featureLegend(items, {
+    position: "bottomleft",
+    title: "Cars",
+    symbolContainerSize: 24,
+    symbolScaling: "maximum",
+    maxSymbolSize: 24,
+    minSymbolSize: 2,
+    collapsed: false,
+    drawShadows: true,
+}).addTo(map);
+};
+}
+
+</script>
+
+
+
+
+
+</body>
+</html>
