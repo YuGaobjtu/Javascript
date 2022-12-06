@@ -1,1 +1,3 @@
 First of all, please unzip the node_modules.zip to the same folder with other files
+
+Then this app could be activited by running app.js in any development environment like Visio Studio Code
