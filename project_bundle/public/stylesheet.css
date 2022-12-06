@@ -1,0 +1,221 @@
+body {
+    margin: 0;
+    width: 100%;
+  }
+  
+  
+  .header {
+    overflow: hidden;
+    height: 25vh;
+    background-color: #1954A6;
+    font-family: 'Noto Serif'
+
+  }
+  
+  .headera {
+    color: white;
+    padding: 10px 10px;
+    font-size: 14px; 
+  }
+
+  .headerb {
+    color: white;
+    padding: 10px 10px;
+    font-size: 16px; 
+  }
+
+  .headerc {
+    color: white;
+    padding: 10px 10px;
+  }
+  
+  .h1 {
+    font-weight: 500;
+    color: white;
+  }
+  .h2 {
+    font-weight: 300;
+    color: white;
+  }
+  
+  .h3 {
+    font-weight: 200;
+    color: white;
+  }
+  
+  .img-size img {
+      width: 30px;
+      height: 30px;
+      background-color: #1954A6;
+  }
+  
+  /* Style page content */
+  .main {
+    display: inline-block !important;
+    width: 99vw;
+    height: 75vh;
+    position: relative;
+    top: 0px;
+  }
+  
+    /* On screens that are less than 700px wide, make the sidebar into a topbar */
+    @media screen and (max-width: 700px) {
+    .main {
+      width: 99vw;
+      height: 70vh;
+      position: relative;
+      margin-left: 0;
+      display: block !important;
+    }
+    .header {
+      overflow: hidden;
+    height: 30vh;
+    background-color: #1954A6;
+    padding: 10px 10px;
+  }
+  #exampleModalCenter {
+    width: 99%;
+    height: 80vh;
+  }
+
+  .modal-header img {
+    width: 50%;
+  }
+  
+  }
+  
+  /* On smaller screens, where height is less than 450px, change the style of the sidebar (less padding and a smaller font size) */
+  @media screen and (max-height: 450px) {
+    .sidenav {
+      padding-top: 15px;
+      font-size: large;
+    }
+    .sidenav a {font-size: 18px;}
+  }
+
+/*Timestep Input*/
+.timestep{
+    font-size: 16px;
+    font-weight: bold;
+    background-color: white;
+    color: #1954A6;
+    margin-right: 10px;
+}
+
+  /*Slider */
+  .switch {
+    position: relative;
+    display: inline-block;
+    width: 30px;
+    height: 17px;
+  }
+  
+  .switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+  }
+  
+  .slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  .slider:before {
+    position: absolute;
+    content: "";
+    height: 13px;
+    width: 13px;
+    left: 2px;
+    bottom: 2px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+  }
+  
+  input:checked + .slider {
+    background-color: #2196F3;
+  }
+  
+  input:focus + .slider {
+    box-shadow: 0 0 1px #2196F3;
+  }
+  
+  input:checked + .slider:before {
+    -webkit-transform: translateX(13px);
+    -ms-transform: translateX(13px);
+    transform: translateX(13px);
+  }
+/* Rounded sliders */
+.slider.round {
+    border-radius: 17px;
+  }
+  
+  .slider.round:before {
+    border-radius: 50%;
+  }
+  
+.info {
+    padding: 6px 8px;
+    font: 14px/16px Arial, Helvetica, sans-serif;
+    background: white;
+    background: rgba(255,255,255,0.8);
+    box-shadow: 0 0 15px rgba(0,0,0,0.2);
+    border-radius: 5px;
+}
+
+.info h4 {
+    margin: 0 0 5px;
+    color: #777;
+}
+
+.legend {
+    line-height: 18px;
+    color: #555;
+    margin-right: 10px;
+}
+.legend i {
+    width: 18px;
+    height: 18px;
+    float: left;
+    margin-right: 8px;
+    opacity: 0.7;
+}
+.footer {
+    display: inline-grid;
+    grid-template-columns: auto auto auto auto;
+    position:relative;
+    width: 100%;
+    height: 30vh;
+    padding: 20px;
+    text-align: center;
+    background: #ddd;
+    overflow: auto;
+  }
+  
+  .column2 {
+    padding: 5px;
+    grid-column: 2 / span 2;
+  }
+  
+  .column {
+    display: flex;
+    flex: 20%;
+    padding: 5px;
+    justify-content: space-evenly
+    
+  }
+  
+  .row {
+    grid-column: 1 / 5;
+    padding: 5px;
+    font-family: 'Noto Serif'
+  }
+  
